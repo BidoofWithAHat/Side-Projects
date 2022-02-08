@@ -14,18 +14,26 @@ windowDimensions = (1000, 1000)
 window = pygame.display.set_mode(windowDimensions)
 drawSurface = pygame.surface.Surface((drawSurfaceWidth, drawSurfaceHeight))
 
-generation = 1
+gen = 1
 turn = 1
+turnsPerGen = 500
 creaturesCount = 100
+creatureNeuronCount = 5
 
 spritesGroup = pygame.sprite.Group()
 creaturesGroup = pygame.sprite.Group()
 
+sensoryNeuronsTypes = [*["distanceFrom"+x for x in ["TopEdge", "BottomEdge", "RightEdge", "LeftEdge"]]]
+actionNeuronsTypes = ["randomMove", *["move"+x for x in ["Right", "Left", "Up", "Down", "UpRight", "UpLeft", "DownRight", "DownLeft"]]]
+
 class Creature(pygame.sprite.Sprite):
-    def __init__(self, posIn, spriteIn, neuralNetworkIn, colorIn, *args, **flags):
+    def __init__(self, posIn, spriteIn, colorIn, *neurons, **flags):
         pygame.sprite.Sprite.__init__(self)
         self.flags = flags
-        self.args = args
+        self.neurons = neurons
+        self.actionNeurons = neurons[0]
+        self.sensoryNeurons = neurons[1]
+        self.innerNeurons = neurons[2]
         self.image = pygame.Surface((spriteSize, spriteSize))
         self.rect = self.image.get_rect()
         self.pos = posIn
@@ -54,13 +62,35 @@ class Creature(pygame.sprite.Sprite):
         
     def update(self):
         pygame.sprite.Sprite.update(self)
-        if self.flags['movement'] == "random":
+        if self.flags.get('movement') == "random":
             self.move(x=random.randrange(-1, 2), y=random.randrange(-1, 2))
         
 def addCreature(quantity, posIn):
-    creature = Creature(posIn, "Square", '', (70, 180, 90), 50, 30, movement="random")
-    creaturesGroup.add(creature)
-    spritesGroup.add(creature)
+    actionNeuronsList = []
+    sensoryNeuronsList = []
+    innerNeuronsList = []
+    for i in range(creatureNeuronCount):
+        availableNeuronTypes = ["innerNeurons"]
+        availableActionNeurons = unsharedItemsInLists(actionNeuronsTypes, actionNeuronsList)
+        availableSensoryNeurons = unsharedItemsInLists(sensoryNeuronsTypes, sensoryNeuronsList)
+        if len(availableActionNeurons) > 0:
+            availableNeuronTypes.append("actionNeurons")
+        if len(availableSensoryNeurons) > 0:
+            availableNeuronTypes.append("sensoryNeurons")
+        
+        chosenNeuronType = random.choice(availableNeuronTypes)
+        if chosenNeuronType == "innerNeurons":
+            innerNeuronsList.append(f"InnerNeuron{len(innerNeuronsList)}")
+        elif chosenNeuronType == "actionNeurons":
+            actionNeuronsList.append(random.choice(availableActionNeurons))
+        elif chosenNeuronType == "sensoryNeurons":
+            sensoryNeuronsList.append(random.choice(availableSensoryNeurons))
+            
+        
+    creature = Creature(posIn, "Square", (70, 180, 90), actionNeuronsList, sensoryNeuronsList, innerNeuronsList)
+    for number in range(quantity):
+        creaturesGroup.add(creature)
+        spritesGroup.add(creature)
     
 def summonByCreaturesCount():
     for i in range(creaturesCount):
@@ -87,7 +117,14 @@ def occupiedSpaces():
 
 def newGeneration():
     generation += 1
-        
+
+def unsharedItemsInLists(list1, list2):
+    newList = []
+    for item in list1:
+        if item not in list2:
+            newList.append(item)
+    return newList
+
 def main():
     
     clock = pygame.time.Clock()
@@ -103,6 +140,8 @@ def main():
                     summonByCreaturesCount()
                 if ev.key == pygame.K_s:
                     print(len(set(occupiedSpaces())))
+                if ev.key == pygame.K_n:
+                    print(creaturesGroup.sprites()[0].actionNeurons)
                 if ev.key == pygame.K_f:
                     outsideSpacesList = []
                     for creature in creaturesGroup.sprites():
