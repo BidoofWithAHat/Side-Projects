@@ -19,6 +19,7 @@ turn = 1
 turnsPerGen = 500
 creaturesCount = 100
 creatureNeuronCount = 5
+innerNeuronStrengthRange = [0.2, 5]
 
 spritesGroup = pygame.sprite.Group()
 creaturesGroup = pygame.sprite.Group()
@@ -80,7 +81,7 @@ def addCreature(quantity, posIn):
         
         chosenNeuronType = random.choice(availableNeuronTypes)
         if chosenNeuronType == "innerNeurons":
-            innerNeuronsList.append(f"InnerNeuron{len(innerNeuronsList)}")
+            innerNeuronsList.append({f"InnerNeuron{len(innerNeuronsList)}":[, random.randrange(innerNeuronStrengthRange)]})
         elif chosenNeuronType == "actionNeurons":
             actionNeuronsList.append(random.choice(availableActionNeurons))
         elif chosenNeuronType == "sensoryNeurons":
