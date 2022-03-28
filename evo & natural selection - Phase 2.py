@@ -66,7 +66,7 @@ class Creature(pygame.sprite.Sprite):
         if self.flags.get('movement') == "random":
             self.move(x=random.randrange(-1, 2), y=random.randrange(-1, 2))
         
-def addCreature(quantity, posIn):
+def createCreature(quantity, posIn):
     actionNeuronsList = []
     sensoryNeuronsList = []
     innerNeuronsList = []
@@ -81,7 +81,8 @@ def addCreature(quantity, posIn):
         
         chosenNeuronType = random.choice(availableNeuronTypes)
         if chosenNeuronType == "innerNeurons":
-            innerNeuronsList.append({f"InnerNeuron{len(innerNeuronsList)}":[, random.randrange(innerNeuronStrengthRange)]})
+            InNeuron = (f"InnerNeuron{len(innerNeuronsList)}", random.randrange(innerNeuronStrengthRange))
+            innerNeuronsList.append(InNeuron)
         elif chosenNeuronType == "actionNeurons":
             actionNeuronsList.append(random.choice(availableActionNeurons))
         elif chosenNeuronType == "sensoryNeurons":
