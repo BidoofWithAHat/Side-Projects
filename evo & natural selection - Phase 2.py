@@ -10,16 +10,18 @@ columnsCount = 100
 
 drawSurfaceWidth = spriteSize*columnsCount
 drawSurfaceHeight = spriteSize*rowsCount
-windowDimensions = (1000, 1000)
+windowDimensions = (1000, 1000) #size of "window display"
 window = pygame.display.set_mode(windowDimensions)
-drawSurface = pygame.surface.Surface((drawSurfaceWidth, drawSurfaceHeight))
+drawSurface = pygame.surface.Surface((drawSurfaceWidth, drawSurfaceHeight)) #main surface #will be stretched to fit the "window display"
 
 gen = 1
 turn = 1
 turnsPerGen = 500
-creaturesCount = 100
-creatureNeuronCount = 5
+startingCreaturesCount = 100 #quantity of creatures the simulation starts with
+creatureNeuronCount = 5 #simply, the complexity of all the creatures
 innerNeuronStrengthRange = [0.2, 5]
+mutationPercentage = 0.1
+#rules: "___"
 
 spritesGroup = pygame.sprite.Group()
 creaturesGroup = pygame.sprite.Group()
