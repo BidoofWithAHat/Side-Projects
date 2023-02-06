@@ -30,6 +30,7 @@ growthRate = 1 #Number of segments the snake will grow after consuming a fruit #
 snakeStartPos = (columnsCount//2, rowsCount//2)
 fruits = []
 lastKeyPressed = "NONE"
+pause = False
 
 """ SETTING CLASSES """
 class SnakeHead():
@@ -87,12 +88,19 @@ class Fruit():
 def addFruit(): #Add a fruit with given [COLOR (R/G/B), POSITION (in array form)], the position being a random pick from all available positions
     fruits.append(Fruit((255, 0, 0), np.array(random.choice(list(set(poss) - set(snakeOccupiedPoss))))))
     
+def reverseBool(boolIn):
+    if boolIn:
+        return False
+    else:
+        return True
+    
 """ INITIALIZE GAME """
 def main():
     
     global lastKeyPressed
     global fruits
     global snakeOccupiedPoss
+    global pause
     
     clock = pygame.time.Clock() #Setting up clock
     running = True
@@ -107,38 +115,42 @@ def main():
     while running:
         
         """ UPDATE """
-        snake.move()
+        if not pause:
+            snake.move()
+            
+            snake.checkCollision()
+            
+            endLoop = len(fruits)
+            i = 0
+            fruitEaten = 0 #Number of fruits eaten this cycle (just in case somehow more than 1 is eaten)
+            while (i < endLoop):
+                if fruits[i].collideCheck(snake.pos): #If {statement} is True,
+                    pygame.event.post(pygame.event.Event(GAME_EVENT, active="FRUITCOLLECTED")) #trigger event "FRUITCOLLECTED"
+                    fruitEaten += 1
+                    fruits.remove(fruits[i]) #delete fruit[i]
+                endLoop -= 1
+            if (fruitEaten == 0) and (lastKeyPressed != "NONE") and (len(snakeOccupiedPoss) > snake.length): #This code may seem weird
+                snakeOccupiedPoss.pop(-1) #Forget the oldest recorded snake position / Get rid of the last segment of the snake
         
-        snake.checkCollision()
-        
-        endLoop = len(fruits)
-        i = 0
-        fruitEaten = 0 #Number of fruits eaten this cycle (just in case somehow more than 1 is eaten)
-        while (i < endLoop):
-            if fruits[i].collideCheck(snake.pos): #If {statement} is True,
-                pygame.event.post(pygame.event.Event(GAME_EVENT, active="FRUITCOLLECTED")) #trigger event "FRUITCOLLECTED"
-                fruitEaten += 1
-                fruits.remove(fruits[i]) #delete fruit[i]
-            endLoop -= 1
-        if (fruitEaten == 0) and (lastKeyPressed != "NONE") and (len(snakeOccupiedPoss) > snake.length): #This code may seem weird
-            snakeOccupiedPoss.pop(-1) #Forget the oldest recorded snake position / Get rid of the last segment of the snake
-        
-        for i in range(fruitEaten):
-            addFruit()
+            for i in range(fruitEaten):
+                addFruit()
             
         """ EVENTS """
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT: 
                 pygame.quit()
-            if ev.type == pygame.KEYDOWN:  
-                if (ev.key == pygame.K_UP or ev.key == pygame.K_w) and (snake.lastDirection != "Down"):
-                    lastKeyPressed = "Up"
-                if (ev.key == pygame.K_RIGHT or ev.key == pygame.K_d) and (snake.lastDirection != "Left"):
-                    lastKeyPressed = "Right"
-                if (ev.key == pygame.K_DOWN or ev.key == pygame.K_s) and (snake.lastDirection != "Up"):
-                    lastKeyPressed = "Down"
-                if (ev.key == pygame.K_LEFT or ev.key == pygame.K_a) and (snake.lastDirection != "Right"):
-                    lastKeyPressed = "Left"
+            if ev.type == pygame.KEYDOWN:
+                if (ev.key == pygame.K_SPACE or ev.key == pygame.K_p):
+                    pause = reverseBool(pause)
+                if not pause:
+                    if (ev.key == pygame.K_UP or ev.key == pygame.K_w) and (snake.lastDirection != "Down"):
+                        lastKeyPressed = "Up"
+                    if (ev.key == pygame.K_RIGHT or ev.key == pygame.K_d) and (snake.lastDirection != "Left"):
+                        lastKeyPressed = "Right"
+                    if (ev.key == pygame.K_DOWN or ev.key == pygame.K_s) and (snake.lastDirection != "Up"):
+                        lastKeyPressed = "Down"
+                    if (ev.key == pygame.K_LEFT or ev.key == pygame.K_a) and (snake.lastDirection != "Right"):
+                        lastKeyPressed = "Left"
             if ev.type == GAME_EVENT:
                 if ev.active == "FRUITCOLLECTED":
                     snake.grow()
