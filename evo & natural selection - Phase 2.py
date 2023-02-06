@@ -17,7 +17,7 @@ drawSurface = pygame.surface.Surface((drawSurfaceWidth, drawSurfaceHeight)) #mai
 gen = 1
 turn = 1
 turnsPerGen = 500
-startingCreaturesCount = 100 #quantity of creatures the simulation starts with
+creaturesCount = 100 #quantity of creatures the simulation starts with
 creatureNeuronCount = 5 #simply, the complexity of all the creatures
 innerNeuronStrengthRange = [0.2, 5]
 mutationPercentage = 0.1
@@ -30,13 +30,14 @@ sensoryNeuronsTypes = [*["distanceFrom"+x for x in ["TopEdge", "BottomEdge", "Ri
 actionNeuronsTypes = ["randomMove", *["move"+x for x in ["Right", "Left", "Up", "Down", "UpRight", "UpLeft", "DownRight", "DownLeft"]]]
 
 class Creature(pygame.sprite.Sprite):
-    def __init__(self, posIn, spriteIn, colorIn, *neurons, **flags):
+    #def __init__(self, posIn, spriteIn, colorIn, *neurons, **flags):
+    def __init__(self, posIn, spriteIn, colorIn, **flags):
         pygame.sprite.Sprite.__init__(self)
         self.flags = flags
-        self.neurons = neurons
-        self.actionNeurons = neurons[0]
-        self.sensoryNeurons = neurons[1]
-        self.innerNeurons = neurons[2]
+#         self.neurons = neurons
+#         self.actionNeurons = neurons[0]
+#         self.sensoryNeurons = neurons[1]
+#         self.innerNeurons = neurons[2]
         self.image = pygame.Surface((spriteSize, spriteSize))
         self.rect = self.image.get_rect()
         self.pos = posIn
@@ -65,33 +66,33 @@ class Creature(pygame.sprite.Sprite):
         
     def update(self):
         pygame.sprite.Sprite.update(self)
-        if self.flags.get('movement') == "random":
-            self.move(x=random.randrange(-1, 2), y=random.randrange(-1, 2))
+        #if self.flags.get('movement') == "random":
+        self.move(x=random.randrange(-1, 2), y=random.randrange(-1, 2))
         
 def createCreature(quantity, posIn):
-    actionNeuronsList = []
-    sensoryNeuronsList = []
-    innerNeuronsList = []
-    for i in range(creatureNeuronCount):
-        availableNeuronTypes = ["innerNeurons"]
-        availableActionNeurons = unsharedItemsInLists(actionNeuronsTypes, actionNeuronsList)
-        availableSensoryNeurons = unsharedItemsInLists(sensoryNeuronsTypes, sensoryNeuronsList)
-        if len(availableActionNeurons) > 0:
-            availableNeuronTypes.append("actionNeurons")
-        if len(availableSensoryNeurons) > 0:
-            availableNeuronTypes.append("sensoryNeurons")
-        
-        chosenNeuronType = random.choice(availableNeuronTypes)
-        if chosenNeuronType == "innerNeurons":
-            InNeuron = (f"InnerNeuron{len(innerNeuronsList)}", random.randrange(innerNeuronStrengthRange))
-            innerNeuronsList.append(InNeuron)
-        elif chosenNeuronType == "actionNeurons":
-            actionNeuronsList.append(random.choice(availableActionNeurons))
-        elif chosenNeuronType == "sensoryNeurons":
-            sensoryNeuronsList.append(random.choice(availableSensoryNeurons))
-            
-        
-    creature = Creature(posIn, "Square", (70, 180, 90), actionNeuronsList, sensoryNeuronsList, innerNeuronsList)
+#     actionNeuronsList = []
+#     sensoryNeuronsList = []
+#     innerNeuronsList = []
+#     for i in range(creatureNeuronCount):
+#         availableNeuronTypes = ["innerNeurons"]
+#         availableActionNeurons = unsharedItemsInLists(actionNeuronsTypes, actionNeuronsList)
+#         availableSensoryNeurons = unsharedItemsInLists(sensoryNeuronsTypes, sensoryNeuronsList)
+#         if len(availableActionNeurons) > 0:
+#             availableNeuronTypes.append("actionNeurons")
+#         if len(availableSensoryNeurons) > 0:
+#             availableNeuronTypes.append("sensoryNeurons")
+#         
+#         chosenNeuronType = random.choice(availableNeuronTypes)
+#         if chosenNeuronType == "innerNeurons":
+#             InNeuron = (f"InnerNeuron{len(innerNeuronsList)}", random.randrange(innerNeuronStrengthRange))
+#             innerNeuronsList.append(InNeuron)
+#         elif chosenNeuronType == "actionNeurons":
+#             actionNeuronsList.append(random.choice(availableActionNeurons))
+#         elif chosenNeuronType == "sensoryNeurons":
+#             sensoryNeuronsList.append(random.choice(availableSensoryNeurons))
+    
+#   creature = Creature(posIn, "Square", (70, 180, 90), actionNeuronsList, sensoryNeuronsList, innerNeuronsList)
+    creature = Creature(posIn, "Square", (70, 180, 90))
     for number in range(quantity):
         creaturesGroup.add(creature)
         spritesGroup.add(creature)
@@ -110,7 +111,7 @@ def summonByCreaturesCount():
                 else:
                     posIn = (posIn[0]+1, posIn[1])
             else:
-                addCreature(1, posIn)
+                createCreature(1, posIn)
                 searching = False
         
 def occupiedSpaces():
